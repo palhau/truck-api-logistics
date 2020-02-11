@@ -1,18 +1,17 @@
 module.exports = (app) => {
-  const notes = require('../controllers/controller.js/index.js');
+  const driver = require('../controllers/controller.js');
 
-  // Create a new note
-  app.post('/notes', notes.create);
+  app.post('/api/driver/create', driver.create);
 
-  // Retrieve all Notes
-  app.get('/notes', notes.findAll);
+  app.get('/api/driver/get-all-without-return', driver.findAll);
 
-  // Retrieve a singles note with noteId
-  app.get('/notes/:noteId', notes.findOne);
+  app.get('/api/driver/get-all-drivers-per-period', driver.findAll);
 
-  // Update a Note with noteId
-  app.put('/notes/:noteId', notes.update);
+  app.get('/api/driver/get-all-with-veichle', driver.findAll);
 
-  // Delete a Note with noteId
-  app.delete('/notes/:noteId', notes.delete);
+  app.get('/api/driver/get-routes-grouped', driver.findOne);
+
+  app.put('/api/driver/update', driver.update); 
+
+  app.delete('/api/driver/delete', driver.delete);
 }
