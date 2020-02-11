@@ -56,11 +56,19 @@ exports.noLoaded = (req, res) => {
     });
 };
 
-// Retrieve and return all drivers that had load group by date.
+// Retrieve and return the amount of drivers that had load, grouped by date.
 exports.datedLoad = (req, res) => {
-  Driver.find({loaded:'sim'})
+  Driver.find({
+    created_at:{
+      $gte: new Date('2020-02-01').getTime(),
+      $lt: new Date('2020-03-01').getTime()
+    },
+    loaded:{
+      $eq: 'sim'
+    }
+  })
     .then(drivers => {
-      res.json(drivers);
+      res.json(drivers.length);
     }).catch(err => {
       res.status(500).json({
         message: err.message || "Some error ocurred while retrieving the drivers."
@@ -68,24 +76,31 @@ exports.datedLoad = (req, res) => {
     });
 };
 
-// Find a single driver with a driverId
-exports.findOne = (req, res) => {
-  Driver.findById(req.params.driverId)
-    .then(driver => {
-      if (!driver) {
-        return res.status(404).send({
-          message: "driver not found with id " + req.params.driverId
-        });
-      }
-      res.send(driver);
+// Retrieve and return all drivers from the database with a veichle.
+exports.getVeichle = (req, res) => {
+  Driver.find({veichle:'sim'})
+    .then(drivers => {
+      res.json(drivers.length);
     }).catch(err => {
-      if (err.kind === "ObjectId") {
-        return res.status(404).send({
-          message: "driver not found with id " + req.params.driverId
-        });
-      }
-      return res.status(500).send({
-        message: "Error retrieving driver with id " + req.params.driverId
+      res.status(500).json({
+        message: err.message || "Some error ocurred while retrieving the drivers."
+      });
+    });
+};
+
+// Retrieve and return the amount of drivers that had load, grouped by date.
+exports.listOriginDestination = (req, res) => {
+  Driver.find({
+    truckType:{
+      $gte: '1',
+      $lt: '6'
+    }
+  })
+    .then(drivers => {
+      res.json();
+    }).catch(err => {
+      res.status(500).json({
+        message: err.message || "Some error ocurred while retrieving the drivers."
       });
     });
 };
