@@ -1,15 +1,14 @@
 const mongoose = require('mongoose');
 const PointSchema = require('./utils/PointSchema');
-const Joi = require('@hapi/joi');
 
-const TruckSchema = mongoose.Schema({
-  name: Joi.string(),
-  age: Joi.number().integer(),
-  gender: Joi.string(),
-  veichle: Joi.boolean().truthy('sim').falsy('no').sensitive(),
-  cnhType: Joi.string(),
-  loaded: Joi.boolean().truthy('sim').falsy('no').sensitive(),
-  type: Joi.number().integer(),
+const DriverSchema = mongoose.Schema({
+  name: {type: String , required: true},
+  age: { type: Number, min: 18, required: true},
+  gender: {type: String , required: true} ,
+  veichle: {type: String, enum:['sim', 'nao'] , required: true},
+  cnhType: {type: String, enum:['C','D','E'] , required: true},
+  loaded: {type: String, enum:['sim', 'nao'] , required: true},
+  truckType: {type: Number, enum:[1,2,3,4,5], required: true },
   origin: {
     type: PointSchema,
     index: '2dsphere'
@@ -18,7 +17,7 @@ const TruckSchema = mongoose.Schema({
     type: PointSchema,
     index: '2dsphere'
   },
-  date: Joi.date().timestamp()
+  date: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model('Truck', TruckSchema);
+module.exports = mongoose.model('Driver', DriverSchema);
