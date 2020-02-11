@@ -38,19 +38,31 @@ exports.create = (req, res) => {
     .then(data => {
       res.json(data);
     }).catch(err => {
-      res.status(500).json({
+      res.status(500).send({
         message: err.message || "Some error ocurred while creating the driver."
       });
     });
 };
 
-// Retrieve and return all drivers from the database.
-exports.findAll = (req, res) => {
-  Driver.find()
+// Retrieve and return all drivers from the database without load.
+exports.noLoaded = (req, res) => {
+  Driver.find({loaded:'nao'})
     .then(drivers => {
-      res.send(drivers);
+      res.json(drivers);
     }).catch(err => {
-      res.status(500).send({
+      res.status(500).json({
+        message: err.message || "Some error ocurred while retrieving the drivers."
+      });
+    });
+};
+
+// Retrieve and return all drivers that had load group by date.
+exports.datedLoad = (req, res) => {
+  Driver.find({loaded:'sim'})
+    .then(drivers => {
+      res.json(drivers);
+    }).catch(err => {
+      res.status(500).json({
         message: err.message || "Some error ocurred while retrieving the drivers."
       });
     });
@@ -69,7 +81,7 @@ exports.findOne = (req, res) => {
     }).catch(err => {
       if (err.kind === "ObjectId") {
         return res.status(404).send({
-          message: "driver nopt found with id " + req.params.driverId
+          message: "driver not found with id " + req.params.driverId
         });
       }
       return res.status(500).send({
