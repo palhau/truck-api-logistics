@@ -7,9 +7,9 @@ module.exports = (app) => {
 
   app.get('/api/driver/get-all-drivers-per-period', driver.datedLoad);
 
-  //app.get('/api/driver/get-all-with-veichle', driver.findAll);
+  app.get('/api/driver/get-all-with-veichle', driver.getVeichle);
 
-  app.get('/api/driver/get-routes-grouped', driver.findOne);
+  app.get('/api/driver/get-routes-grouped', driver.listOriginDestination);
 
   app.put('/api/driver/update', driver.update); 
 
