@@ -28,7 +28,7 @@ mongoose.connect(dbConfig.url, {
 
 // define a simples route
 app.get('/', (req, res) => {
-  res.json({"message": "Welcome to EasyNotes application. Take notes quickly. Organize and keep track of all your notes"});
+  res.json({"message": "Welcome to Truckpad application. Register and search for drivers as fastests as possible."});
 });
 
 // listen for requests
@@ -36,5 +36,5 @@ app.listen(3000, () => {
   console.log("Server is listening on port 3000");
 })
 
-// Require Notes routes
+// Require Drivers routes
 require('./app/routes/routes.js')(app);

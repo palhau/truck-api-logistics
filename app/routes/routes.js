@@ -3,11 +3,11 @@ module.exports = (app) => {
 
   app.post('/api/driver/create', driver.create);
 
-  app.get('/api/driver/get-all-without-return', driver.findAll);
+  app.get('/api/driver/get-all-without-return', driver.noLoaded);
 
-  app.get('/api/driver/get-all-drivers-per-period', driver.findAll);
+  app.get('/api/driver/get-all-drivers-per-period', driver.datedLoad);
 
-  app.get('/api/driver/get-all-with-veichle', driver.findAll);
+  //app.get('/api/driver/get-all-with-veichle', driver.findAll);
 
   app.get('/api/driver/get-routes-grouped', driver.findOne);
 
