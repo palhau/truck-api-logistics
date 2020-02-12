@@ -22,14 +22,14 @@ exports.create = (req, res) => {
     cnhType: req.body.cnhType,
     loaded: req.body.loaded,
     truckType: req.body.truckType,
-    origin: {
-      type: 'Point',
-      coordinates: [oLongitude, oLatitude]
-    },
-    destination: {
-      type: 'Point',
-      coordinates: [dLongitude, dLatitude]
-    },
+      origin: {
+        type: 'Point',
+        coordinates: [oLongitude, oLatitude]
+      },
+      destination: {
+        type: 'Point',
+        coordinates: [dLongitude, dLatitude]
+      },
     date: req.body.date
   });
 
@@ -46,7 +46,7 @@ exports.create = (req, res) => {
 
 // Retrieve and return all drivers from the database without load.
 exports.noLoaded = (req, res) => {
-  Driver.find({loaded:'nao'})
+  Driver.find({ loaded: 'nao' })
     .then(drivers => {
       res.json(drivers);
     }).catch(err => {
@@ -59,11 +59,11 @@ exports.noLoaded = (req, res) => {
 // Retrieve and return the amount of drivers that had load, grouped by date.
 exports.datedLoad = (req, res) => {
   Driver.find({
-    created_at:{
+    created_at: {
       $gte: new Date('2020-02-01').getTime(),
       $lt: new Date('2020-03-01').getTime()
     },
-    loaded:{
+    loaded: {
       $eq: 'sim'
     }
   })
@@ -78,7 +78,7 @@ exports.datedLoad = (req, res) => {
 
 // Retrieve and return all drivers from the database with a veichle.
 exports.getVeichle = (req, res) => {
-  Driver.find({veichle:'sim'})
+  Driver.find({ veichle: 'sim' })
     .then(drivers => {
       res.json(drivers.length);
     }).catch(err => {
@@ -90,14 +90,13 @@ exports.getVeichle = (req, res) => {
 
 // Retrieve and return the amount of drivers that had load, grouped by date.
 exports.listOriginDestination = (req, res) => {
-  Driver.find({
-    truckType:{
-      $gte: '1',
-      $lt: '6'
-    }
-  })
+  Driver.aggregate([
+    {$match: {truckType: {$gte: 1}} },
+    {$group: {_id: "$truckType", origin:{$push: "$cordinates"}, destination:{$push: "$cordinates"} } },
+    {$sort: { truckType: 1 } }
+  ])
     .then(drivers => {
-      res.json();
+      res.json(drivers);
     }).catch(err => {
       res.status(500).json({
         message: err.message || "Some error ocurred while retrieving the drivers."
