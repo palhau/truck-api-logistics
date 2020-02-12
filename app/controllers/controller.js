@@ -60,11 +60,10 @@ exports.noLoaded = (req, res) => {
 exports.datedLoad = (req, res) => {
   Driver.aggregate([
     { $match: { loaded: 'sim' } },
-    { $group: { _id: "$date" } },
-    { $sort: { date: -1 } }
+    { $group: { _id: { $dateToString: { format: "%d-%m-%Y", date: "$date" } } } }
   ])
     .then(drivers => {
-      res.json(drivers.length);
+      res.json(drivers);
     }).catch(err => {
       res.status(500).json({
         message: err.message || "Some error ocurred while retrieving the drivers."
@@ -73,7 +72,7 @@ exports.datedLoad = (req, res) => {
 };
 
 // Retrieve and return all drivers from the database with a veichle.
-exports.getVeichle = (req, res) => {
+exports.getVehicle = (req, res) => {
   Driver.find({ veichle: 'sim' })
     .then(drivers => {
       res.json(drivers.length);
@@ -88,8 +87,21 @@ exports.getVeichle = (req, res) => {
 exports.listOriginDestination = (req, res) => {
   Driver.aggregate([
     { $match: { truckType: { $gte: 1 } } },
-    { $group: { _id: "$truckType", origin: { $push: "$cordinates" }, destination: { $push: "$cordinates" } } },
-    { $sort: { truckType: 1 } }
+    {
+      $group:
+      {
+        _id: "$truckType",
+        locations: {
+          $push: {
+            origin:
+              { coordinates: ["$oLongitude", "$oLatitude"] },
+            destination:
+              { coordinates: ["$dLongitude", "$dLatitude"] }
+          }
+        }
+      }
+    },
+    { $sort: { truckType: -1 } }
   ])
     .then(drivers => {
       res.json(drivers);
