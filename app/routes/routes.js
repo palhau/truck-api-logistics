@@ -11,7 +11,7 @@ module.exports = (app) => {
 
   app.get('/api/driver/get-routes-grouped', driver.listOriginDestination);
 
-  app.put('/api/driver/update', driver.update); 
+  app.put('/api/driver/:driverId', driver.update); 
 
-  app.delete('/api/driver/delete', driver.delete);
+  app.delete('/api/driver/:driverId', driver.delete);
 }
