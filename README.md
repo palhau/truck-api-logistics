@@ -55,9 +55,3 @@ We use [GitHub](https://github.com/) for versioning. For the versions available,
 ## Author
 
 * **Alan Palhau** - *Initial work* - [PurpleBooth](https://github.com/palhau)
-
-## Acknowledgments
-
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
