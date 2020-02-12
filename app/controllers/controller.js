@@ -9,7 +9,7 @@ exports.create = (req, res) => {
   // Validade request
   if (!Object.keys(req.body).length) {
     return res.status(400).json({
-      message: "Form content can't be empty"
+      message: "Form content can not be empty"
     });
   }
 
@@ -22,14 +22,14 @@ exports.create = (req, res) => {
     cnhType: req.body.cnhType,
     loaded: req.body.loaded,
     truckType: req.body.truckType,
-      origin: {
-        type: 'Point',
-        coordinates: [oLongitude, oLatitude]
-      },
-      destination: {
-        type: 'Point',
-        coordinates: [dLongitude, dLatitude]
-      },
+    origin: {
+      type: 'Point',
+      coordinates: [oLongitude, oLatitude]
+    },
+    destination: {
+      type: 'Point',
+      coordinates: [dLongitude, dLatitude]
+    },
     date: req.body.date
   });
 
@@ -58,15 +58,11 @@ exports.noLoaded = (req, res) => {
 
 // Retrieve and return the amount of drivers that had load, grouped by date.
 exports.datedLoad = (req, res) => {
-  Driver.find({
-    created_at: {
-      $gte: new Date('2020-02-01').getTime(),
-      $lt: new Date('2020-03-01').getTime()
-    },
-    loaded: {
-      $eq: 'sim'
-    }
-  })
+  Driver.aggregate([
+    { $match: { loaded: 'sim' } },
+    { $group: { _id: "$date" } },
+    { $sort: { date: -1 } }
+  ])
     .then(drivers => {
       res.json(drivers.length);
     }).catch(err => {
@@ -91,9 +87,9 @@ exports.getVeichle = (req, res) => {
 // Retrieve and return the amount of drivers that had load, grouped by date.
 exports.listOriginDestination = (req, res) => {
   Driver.aggregate([
-    {$match: {truckType: {$gte: 1}} },
-    {$group: {_id: "$truckType", origin:{$push: "$cordinates"}, destination:{$push: "$cordinates"} } },
-    {$sort: { truckType: 1 } }
+    { $match: { truckType: { $gte: 1 } } },
+    { $group: { _id: "$truckType", origin: { $push: "$cordinates" }, destination: { $push: "$cordinates" } } },
+    { $sort: { truckType: 1 } }
   ])
     .then(drivers => {
       res.json(drivers);
@@ -107,32 +103,38 @@ exports.listOriginDestination = (req, res) => {
 // Update a driver identified by the driverId in the request
 exports.update = (req, res) => {
   //Validade request
-  if (!req.body.content) {
-    return res.status(400).send({
-      message: "driver content can not be empty"
+  if (!Object.keys(req.body).length) {
+    return res.status(400).json({
+      message: "driver form can not be empty"
     });
   }
 
   //Find a driver and update it with the request body
   Driver.findByIdAndUpdate(req.params.driverId, {
-    title: req.body.title || "Untitled driver",
-    content: req.body.content
+    name: req.body.name,
+    age: req.body.age,
+    gender: req.body.gender,
+    veichle: req.body.veichle,
+    cnhType: req.body.cnhType,
+    loaded: req.body.loaded,
+    truckType: req.body.truckType,
+    date: req.body.date
   }, { new: true })
     .then(driver => {
       if (!driver) {
-        return res.status(404).send({
-          message: "driver driver found with id " + req.params.driverId
-        });
-      }
-      res.send(driver);
-    }).catch(err => {
-      if (err.kind === 'ObjectId') {
-        return res.status(404).send({
+        return res.status(404).json({
           message: "driver not found with id " + req.params.driverId
         });
       }
-      return res.status(500).send({
-        message: "Erro updating driver with id " + req.params.driverId
+      res.json(driver);
+    }).catch(err => {
+      if (err.kind === 'ObjectId') {
+        return res.status(404).json({
+          message: "driver not found with id " + req.params.driverId
+        });
+      }
+      return res.status(500).json({
+        message: err.message || "Error updating driver with id " + req.params.driverId
       });
     });
 };

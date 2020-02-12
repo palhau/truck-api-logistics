@@ -17,7 +17,7 @@ const DriverSchema = mongoose.Schema({
       type: PointSchema,
       index: '2dsphere'
     },
-  created_at: { type: Date, default: new Date().getTime() }
+  date: { type: Date, required: true }
 });
 
 module.exports = mongoose.model('Driver', DriverSchema);
