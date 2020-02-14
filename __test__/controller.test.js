@@ -1,38 +1,115 @@
-const mockingoose = require('mockingoose').default;
+const Controller = require('../app/controllers/controller.js');
+const Driver = require('../app/models/models.js');
 
-const { create, noLoaded, datedLoad, getVeichle, listOriginDestination, update} = require('../app/controllers/controller.js');
-const model = require('../app/models/models.js')
+jest.mock('../app/models/models.js', () => {
+  const mDriver = { save: jest.fn() };
+  return jest.fn(() => mDriver);
+});
 
-jest.mock('../app/models/models.js', () => ({ Dirver: jest.fn() }));
-
-describe('Controller', () => {
-  let mRes;
-  const mReq = { body: {
-    name: "Antonio dos Santos",
-      age: "27",
-      gender: "masculino",
-      veichle: "nao",
-      cnhType: "D",
-      loaded: "nao",
-      truckType: 2,
-      origin:{
-      coordinates:[ -46.9213486, -23.7341936]
-      },
-      destination:{
-        coordinates: [-46.9057519, -23.8529033]
-      },
-      date: "08/02/2020"
-  }};
-  beforeEach(() => {
-    mRes = { status: jest.fn().mockReturnThis(), json: jest.fn() };
-  });
+describe('Creating Driver Test', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
+  });
+  it('Should create driver and send to MongoDB', () => {
+    const mRes = { json: jest.fn() };
+    const mDriver = new Driver();
+
+    expect.assertions(3);
+    const mReq = {
+      body: {
+        name: 'Jose da Silva Sauro',
+        age: 23,
+        gender: 'masculino',
+        veichle: 'sim',
+        cnhType: 'D',
+        loaded: 'sim',
+        truckType: '1',
+        oLatitude: 1,
+        oLongitude: 1,
+        dLongitude: 2,
+        dLatitude: 2,
+        date: '14/02/2020',
+      },
+    };
+    mDriver.save.mockResolvedValueOnce('saved driver');
+    return Controller.create(mReq, mRes).then(() => {
+      expect(Driver).toBeCalledWith({
+        name: 'Jose da Silva Sauro',
+        age: 23,
+        gender: 'masculino',
+        veichle: 'sim',
+        cnhType: 'D',
+        loaded: 'sim',
+        truckType: '1',
+        origin: {
+          type: 'Point',
+          coordinates: [1, 1],
+        },
+        destination: {
+          type: 'Point',
+          coordinates: [2, 2],
+        },
+        date: '14/02/2020',
+      });
+      expect(mDriver.save).toBeCalledTimes(1);
+      expect(mRes.json).toBeCalledWith('saved driver');
+    });
   });
 
-  it('Should return the driver created', () => {
-    create(mReq, mRes);
-    expect(mRes.json()).toMatchObject();
-    expect(mRes.status(500)).toBeCalledWith({ error: { message: "Some error ocurred while creating the driver." } });
+  it('Should handle error if request body is empty', () => {
+    const mReq = { body: {} };
+    const mRes = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+
+    Controller.create(mReq, mRes);
+    expect(mRes.status).toBeCalledWith(400);
+    expect(mRes.status(400).json).toBeCalledWith({ message: 'Form content can not be empty' });
+  });
+
+  it('Should handle error if save driver failure', () => {
+    const mRes = { status: jest.fn().mockReturnThis(), send: jest.fn() };
+    const mDriver = new Driver();
+    const mError = new Error('database connection failure');
+
+    expect.assertions(4);
+    const mReq = {
+      body: {
+        name: 'Jose da Silva Sauro',
+        age: 23,
+        gender: 'masculino',
+        veichle: 'sim',
+        cnhType: 'D',
+        loaded: 'sim',
+        truckType: '1',
+        oLatitude: 1,
+        oLongitude: 1,
+        dLongitude: 2,
+        dLatitude: 2,
+        date: '14/02/2020',
+      },
+    };
+    mDriver.save.mockRejectedValueOnce(mError);
+    return Controller.create(mReq, mRes).then(() => {
+      expect(Driver).toBeCalledWith({
+        name: 'Jose da Silva Sauro',
+        age: 23,
+        gender: 'masculino',
+        veichle: 'sim',
+        cnhType: 'D',
+        loaded: 'sim',
+        truckType: '1',
+        origin: {
+          type: 'Point',
+          coordinates: [1, 1],
+        },
+        destination: {
+          type: 'Point',
+          coordinates: [2, 2],
+        },
+        date: '14/02/2020',
+      });
+      expect(mDriver.save).toBeCalledTimes(1);
+      expect(mRes.status).toBeCalledWith(500);
+      expect(mRes.status(500).send).toBeCalledWith({ message: mError.message });
+    });
   });
 });

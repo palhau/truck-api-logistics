@@ -34,7 +34,7 @@ exports.create = (req, res) => {
   });
 
   //Save driver in the database
-  driver.save()
+  return driver.save()
     .then(data => {
       res.json(data);
     }).catch(err => {
